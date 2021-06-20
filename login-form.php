@@ -53,7 +53,7 @@ function Test_User_Input($Data)
 <body>
     <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" style="position:absolute; padding: 30em 75em 0 75em" method="POST">
         <fieldset>
-            <legend>Login</legend>
+            <legend style="text-align: center;">Login</legend>
 
             <p>
                 <span>
