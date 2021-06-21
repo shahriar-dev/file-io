@@ -5,29 +5,64 @@ $PasswordError = "";
 $Username = "";
 $Password = "";
 
+$LoginErrorMessage = "";
+$emptyField = false;
+$LoginSuccess = false;
+$Message = "";
+$user;
+
+define("filepath", "data.txt");
+
 if ($_SERVER['REQUEST_METHOD'] === "POST") {
     if (isset($_POST['submit'])) {
         if (empty($_POST['username'])) {
             $UsernameError = "Username Required!";
+            $emptyField = true;
         } else {
             $Username = Test_User_Input($_POST['username']);
 
             if (!preg_match("/^[A-Za-z0-9. ]*$/", $Username)) {
                 $UsernameError = "Only Number and lowercase, Uppercase Letter are Allowed!";
+                $emptyField = true;
             }
         }
 
         if (empty($_POST['password'])) {
             $PasswordError = "Password REQUIRED!";
+            $emptyField = true;
         } else {
             $Password = Test_User_Input($_POST['password']);
 
-            $UpperCase = preg_match("@[A-Z]@", $Password);
+            /*$UpperCase = preg_match("@[A-Z]@", $Password);
             $LowerCase = preg_match("@[a-z]@", $Password);
             $Number = preg_match("@[0-9]@", $Password);
 
             if (!$UpperCase || !$LowerCase || !$Number) {
                 $PasswordError = "Password Incorrect!";
+                $emptyField = true;
+            }*/
+        }
+
+        if (!$emptyField) {
+            $retrievedData = file_get_contents(filepath);
+            $retrievedData = json_decode($retrievedData);
+            if ($retrievedData != null) {
+                for ($i = 0; $i < count($retrievedData); $i++) {
+                    $user = $retrievedData[$i];
+                    if ($user->userName == $Username && $user->password == $Password) {
+                        $LoginSuccess = true;
+                        break;
+                    }
+                }
+            } else {
+                $Message = "There is no details of any user in the file!";
+            }
+
+            if (!$LoginSuccess) {
+                $Message = "Verification Failed! Please try again...";
+            } else {
+                header("Location: welcome-page.php");
+                exit();
             }
         }
     }
@@ -51,9 +86,9 @@ function Test_User_Input($Data)
 </head>
 
 <body>
-    <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" style="position:absolute; padding: 30em 75em 0 75em" method="POST">
+    <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST">
         <fieldset>
-            <legend style="text-align: center;">Login</legend>
+            <legend style="text-align: center; font-size:50px;">Login</legend>
 
             <p>
                 <span>
@@ -74,12 +109,17 @@ function Test_User_Input($Data)
             <span>
                 <input type="submit" id="input_submit" name="submit">
                 <input type="reset" value="Clear Form">
+                <label for="error_message" style="color:red;"><?php echo $Message ?></label>
             </span>
-
         </fieldset>
-
-
     </form>
+
+    <div style="width:300px; height: 100px; clear:both;">
+        <button style="width:100%; height:100%; background:blue; border-radius:2px; margin:0px; float:right;">
+            <a style="color: white; font-family:Cambria; font-size:50px;" href="registration-form-with-validation.php">Register</a>
+        </button>
+    </div>
+
 </body>
 
 </html>
